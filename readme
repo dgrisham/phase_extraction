@@ -1,0 +1,8 @@
+for lam:
+
+to update git repo after you change files:
+    cd to phase_extraction (topmost directory of project)
+    git add *
+    git commit -m "put commit message here"
+    git pull (to make sure changes haven't been made)
+    git push origin master

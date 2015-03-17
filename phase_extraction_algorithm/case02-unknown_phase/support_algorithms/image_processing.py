@@ -14,7 +14,7 @@ from numpy import array, angle
 import numpy as np
 from copy import deepcopy
 # Image processing
-import Image, ImageEnhance
+from PIL import Image, ImageEnhance
 # OpenCV for Computer vision
 import cv2
 # Set the directory of stored images
@@ -32,16 +32,16 @@ import os
 
 ####################### Input and output images ######################
 'List of images'
-images = array(["Step_01-Interferogram.jpg",
-                                "Step_02-FFT_Interferogram.jpg",
-                                "Step_03-Power_Spectrum_Interferogram.jpg",
-                                "Step_04-Sidelob_Density.jpg",
-                                "Step_05-Power_Spectrum_Side_Lob.jpg",
-                                "Step_06-invFFT_Interferogram.jpg",
-                                "Step_07-Phase_Interferogram.jpg",
-                                "Step_08-Unwrapped_Phase_Interferogram.jpg",
-                                "Step_09_Compare-Unwrapped_Phase_Interferogram.jpg",
-                                "Step_10-Phase_Wavefront.jpg"
+images = array(["step_01-interferogram.jpg",
+                                "step_02-fft_interferogram.jpg",
+                                "step_03-power_spectrum_interferogram.jpg",
+                                "step_04-sidelob_density.jpg",
+                                "step_05-power_spectrum_side_lob.jpg",
+                                "step_06-invfft_interferogram.jpg",
+                                "step_07-phase_interferogram.jpg",
+                                "step_08-unwrapped_phase_interferogram.jpg",
+                                "step_09_compare-unwrapped_phase_interferogram.jpg",
+                                "step_10-phase_wavefront.jpg"
                                 ])
 
 'Open an image'
@@ -58,8 +58,7 @@ def imageIn(step, path):
 'Adjust the brightness'
 def enhancer(image, brightness, folder):
         # Image path
-        path = os.getcwd()[:-21] + folder
-
+        path = os.path.abspath(os.path.join(os.getcwd(),os.pardir)) + "/" + folder
         # Input the image
         I, path = imageIn(image, path)
 
@@ -89,10 +88,10 @@ def enhancer(image, brightness, folder):
 'Track the centroid of the side lobes'
 def centroidSidelobe(imageName):
         # Import the image
-        image = cv2.imread("./Results/" + imageName)
+        image = cv2.imread("./results/" + imageName)
 
         # Check dimensions of image (width, height)
-        imageDim = Image.open("./Results/" + imageName).size
+        imageDim = Image.open("./results/" + imageName).size
         width = imageDim[0]
         height = imageDim[1]
         
@@ -140,7 +139,7 @@ def centroidSidelobe(imageName):
                                         cv2.rectangle(image, (x,y), (x+w, y+h), (0,255,0), 2)
                                 
                                 # Write blobs to the image file
-                                cv2.imwrite("./Results/Blob_Detection.jpg", image)
+                                cv2.imwrite("./results/blob_detection.jpg", image)
 
                                 # Save centroids to array
                                 centroids = np.append(centroids, [[x, y]], axis=0)

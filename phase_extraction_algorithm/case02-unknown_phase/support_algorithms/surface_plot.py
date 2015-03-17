@@ -24,7 +24,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import sys
 sys.path.append("./")
 # Import modules for unit conversion
-from Interferogram_Simulation import convert
+from interferogram_simulation import convert
 
 
 ######################## Set up the graph ############################
