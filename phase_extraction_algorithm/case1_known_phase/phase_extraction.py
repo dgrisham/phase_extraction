@@ -1,3 +1,5 @@
+#!/usr/bin/python2.7
+
 '''
     Collaborators: Lam H. Mach & David Grisham
     Engineering Physics 2016
@@ -10,8 +12,10 @@
 
 ################### Import modules and Python packages ###############
 'Import Python packages'
+#system, os libraries
+import sys, os
 # Image processing
-import Image
+from PIL import Image
 # Computation
 import numpy as np
 from numpy import array, pi
@@ -20,18 +24,17 @@ import matplotlib.pyplot as plt
 
 'Import external Python modules'
 # Set the modules' directory
-import sys, os
-sys.path.append(os.getcwd()[:-19] + "Support_Algorithms")
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(),os.pardir)) + "/support_algorithms")
 # Import modules for simulating the interferogram
-from Interferogram_Simulation import convert, intensityProfile
+from interferogram_simulation import convert, intensityProfile
 # Import modules for plotting
-from Surface_Plot import densityPlot, xyPlot, surfacePlot
+from surface_plot import densityPlot, xyPlot, surfacePlot
 # Import modules for performing Fourier transform
-from Fourier_Transformation import FFT, fixDim, invFFT
+from fourier_transformation import FFT, fixDim, invFFT
 # Import modules for extracting phase
-from Phase_Retrieval import phaseExtraction, unwrapPhaseProfile
+from phase_retrieval import phaseExtraction, unwrapPhaseProfile
 # Import modules for processing images
-from Image_Processing import enhancer
+from image_processing import enhancer
 
 
 '''
@@ -90,7 +93,7 @@ yAxisStored = yAxis
 'Plot the simulated interferogram from given parameters'
 # Set necessary parameters
 title = r'The Simulated Interferogram (mm)'
-saveDirectory = "./Results/Step_01-Interferogram.jpg"
+saveDirectory = "./results/step_01-interferogram.jpg"
 style = 'Greys'
 interpolation = 'gaussian'
 show = 0
@@ -106,7 +109,7 @@ transI = FFT(I, xPixel, xRealDis/xPixel)
 'Plot the FFT of the given interferogram'
 # Set necessary parameters
 title = r'The FFT of The Simulated Interferogram (mm)'
-saveDirectory = "./Results/Step_02-FFT_Interferogram.jpg"
+saveDirectory = "./results/step_02-fft_interferogram.jpg"
 style = None
 interpolation = 'gaussian'
 show = 0
@@ -136,7 +139,7 @@ fxList = convert(fxList, 'mm')
 title = r'The Power Spectrum of The Simulated Interferogram'
 xtitle = r'X Distance (mm)'
 ytitle = r'Intensity'
-saveDirectory = "./Results/Step_03-Power_Spectrum_Interferogram.jpg"
+saveDirectory = "./results/step_03-power_spectrum_interferogram.jpg"
 show = 0
 gridlines = [convert(-fx0, 'mm'), convert(fx0, 'mm')]
 
@@ -145,69 +148,69 @@ xyPlot(fxList, zeroFFT, title, xtitle, ytitle,
        saveDirectory, show, gridlines)
 
 
-############# Isolate the side-lob for visualization #################
+############# Isolate the side-lobe for visualization #################
 'Define parameters'
-# Size of the side-lob
+# Size of the side-lobe
 pixelWindow = round(fx0/(2. * dx))
 distanceCenter = xPixel/2 + round(fx0/dx)
 
-'Isolate the side-lob'
-sidelobWindow = transI[xPixel/2-pixelWindow-2 : xPixel/2+pixelWindow+2].T
-sidelobWindow = sidelobWindow[distanceCenter-pixelWindow-2 : distanceCenter+pixelWindow+2].T
+'Isolate the side-lobe'
+sidelobeWindow = transI[xPixel/2-pixelWindow-2 : xPixel/2+pixelWindow+2].T
+sidelobeWindow = sidelobeWindow[distanceCenter-pixelWindow-2 : distanceCenter+pixelWindow+2].T
 
 'Visualize the isolated side-lobe'
 # Set necessary parameters
 title = r'Density Plot of The Side Lob'
-saveDirectory = "./Results/Step_04-Sidelob_Density.jpg"
+saveDirectory = "./results/step_04-sidelobe_density.jpg"
 style = 'jet'
 interpolation = 'gaussian'
 show = 0
 
 # Set up the axes size
-xAxis = array([i for i in xrange(len(sidelobWindow))])
-yAxis = array([i for i in xrange(len(sidelobWindow))])
+xAxis = array([i for i in xrange(len(sidelobeWindow))])
+yAxis = array([i for i in xrange(len(sidelobeWindow))])
 
 '''
-    The density plot of the side-lob
+    The density plot of the side-lobe
 '''
 
-# Plot the density map of the side-lob
-densityPlot(abs(sidelobWindow), xAxis, yAxis, title, style, 
+# Plot the density map of the side-lobe
+densityPlot(abs(sidelobeWindow), xAxis, yAxis, title, style, 
             interpolation, saveDirectory, show)
 
 '''
-    The power spectrum plot of the side-lob
+    The power spectrum plot of the side-lobe
 '''
 
 # Set up the axes size
-xAxis = array([i for i in xrange(len(sidelobWindow[pixelWindow]))])
+xAxis = array([i for i in xrange(len(sidelobeWindow[pixelWindow]))])
 
 # Set necessary parameters
 title = r'The Power Spectrum of The Simulated Side Lob'
 xtitle = r'X Distance (mm)'
 ytitle = r'Intensity'
-saveDirectory = "./Results/Step_05-Power_Spectrum_Side_Lob.jpg"
+saveDirectory = "./results/step_05-power_spectrum_side_lobe.jpg"
 show = 0
 gridlines = [None, None]
 
-# Plot the power spectrum of the side-lob
-xyPlot(xAxis, abs(sidelobWindow[pixelWindow]), title, xtitle, ytitle,
+# Plot the power spectrum of the side-lobe
+xyPlot(xAxis, abs(sidelobeWindow[pixelWindow]), title, xtitle, ytitle,
        saveDirectory, show, gridlines)
 
 
 ############ Padding empty spaces in Fourier space ###################
 'Pad the matrix with zeros in x and y directions'
-sidelobWindow = fixDim(sidelobWindow, xPixel)
+sidelobeWindow = fixDim(sidelobeWindow, xPixel)
 
 
 ############# Perform the inverse Fourier transform ##################
 'Perform the inverse Fourier transform'
-invtransI = invFFT(sidelobWindow, xPixel, xRealDis/xPixel)
+invtransI = invFFT(sidelobeWindow, xPixel, xRealDis/xPixel)
 
 'Plot the inverse FFT of the phase of the given interferogram'
 # Set necessary parameters
 title = r'The Inverse FFT of The Phase'
-saveDirectory = "./Results/Step_06-invFFT_Interferogram.jpg"
+saveDirectory = "./results/step_06-inv_fft_interferogram.jpg"
 style = 'Greys'
 interpolation = 'gaussian'
 show = 0
@@ -224,7 +227,7 @@ phaseProfile = phaseExtraction(invtransI)
 'Plot the phase of the given interferogram'
 # Set necessary parameters
 title = r'Phase of The Interferogram'
-saveDirectory = "./Results/Step_07-Phase_Interferogram.jpg"
+saveDirectory = "./results/step_07-phase_interferogram.jpg"
 style = 'jet'
 interpolation = None
 show = 0
@@ -236,7 +239,7 @@ densityPlot(phaseProfile, xAxis, yAxis, title, style,
 
 ##################### Image Enhancement ##############################
 'Set the image folder'
-folder = "Case_01-Known_Phase\\Results\\"
+folder = "case_01-known_phase\\results\\"
 
 'Increase the brightness of images'
 enhancer(6, 1.3, folder)
@@ -262,7 +265,7 @@ phaseUnwrap = unwrapPhaseProfile(phaseProfile, mode, threshold)
 'Plot the unwrapped phase of the given interferogram'
 # Set necessary parameters
 title = r'Unwrapped Phase of The Interferogram'
-saveDirectory = "./Results/Step_08-Unwrapped_Phase_Interferogram.jpg"
+saveDirectory = "./results/step_08-unwrapped_phase_interferogram.jpg"
 style = 'jet'
 interpolation = None
 show = 0
@@ -276,7 +279,7 @@ densityPlot(phaseUnwrap, xAxis, yAxis, title, style,
 'Plot the wavefront of the phase of the given interferogram'
 # Set necessary parameters
 title = r'Phase Wavefront of The Interferogram'
-saveDirectory = "./Results/Step_10-Phase_Wavefront.jpg"
+saveDirectory = "./results/step_10-phase_wavefront.jpg"
 style = 'jet'
 show = 0
 
