@@ -4,5 +4,5 @@ to update git repo after you change files:
     cd to phase_extraction (topmost directory of project)
     git add *
     git commit -m "put commit message here"
-    git pull (to make sure changes haven't been made)
-    git push origin master
+    git push origin master (if this gives you errors...uh, talk to me or email
+    me, unless you can figure it out)
