@@ -1,9 +1,7 @@
-#!/usr/bin/python2.7
-
 '''
     Collaborators: Lam H. Mach & David Grisham
     Engineering Physics 2016
-    Date: 02/22/2015
+    Date: 02/27/2015
     Faculty Adviser: Dr. Charles Durfee
     Department of Physics
     Colorado School of Mines
@@ -16,14 +14,15 @@
 import Image
 # Computation
 import numpy as np
-from numpy import array, pi
+from numpy import array, pi, append
+from copy import deepcopy
 # Plotting
 import matplotlib.pyplot as plt
 
 'Import external Python modules'
 # Set the modules' directory
 import sys, os
-sys.path.append(os.getcwd()[:-19] + "Support_Algorithms")
+sys.path.append(os.getcwd()[:-21] + "Support_Algorithms")
 # Import modules for simulating the interferogram
 from Interferogram_Simulation import convert, intensityProfile
 # Import modules for plotting
@@ -33,7 +32,7 @@ from Fourier_Transformation import FFT, fixDim, invFFT
 # Import modules for extracting phase
 from Phase_Retrieval import phaseExtraction, unwrapPhaseProfile
 # Import modules for processing images
-from Image_Processing import enhancer
+from Image_Processing import enhancer, centroidSidelobe, sort
 
 
 '''
@@ -147,64 +146,85 @@ xyPlot(fxList, zeroFFT, title, xtitle, ytitle,
        saveDirectory, show, gridlines)
 
 
-############# Isolate the side-lob for visualization #################
-'Define parameters'
-# Size of the side-lob
-pixelWindow = round(fx0/(2. * dx))
-distanceCenter = xPixel/2 + round(fx0/dx)
+############# Isolate the side-lobe for visualization ################
+'Import the density image of the FFT of the interferogram'
+filename = 'Step_02-FFT_Interferogram.jpg'
 
-'Isolate the side-lob'
-sidelobWindow = transI[xPixel/2-pixelWindow-2 : xPixel/2+pixelWindow+2].T
-sidelobWindow = sidelobWindow[distanceCenter-pixelWindow-2 : distanceCenter+pixelWindow+2].T
+'Find the centroids'
+centroids = centroidSidelobe(filename)
+object1 = [centroids[-1]]
+
+'Isolate centroids that are belong to the left feature'
+for i in xrange(len(centroids), 2, -1):
+    if abs(centroids[i-2,0] - centroids[i-1,0]) < 20:
+        object1.append(centroids[i-2])
+    else:
+        break
+
+'Define the size of the scaled window for the side-lobe'
+ydiff = abs(centroids[-1,1] - centroids[-4,1])/2 + 20
+xdiff = ydiff
+
+'Set the range of data used'
+# Set the midpoint of the image
+midPoint = xPixel/2
+# Set the shift in x and y direction
+yShift = ydiff*1.27
+xShift = 0
+
+'Isolate the side-lobe'
+sidelobeWindow = deepcopy(transI[(midPoint + xShift) - xdiff : (midPoint + xShift) + xdiff]).T
+sidelobeWindow = sidelobeWindow[(midPoint + yShift) - ydiff : (midPoint + yShift) + ydiff].T
 
 'Visualize the isolated side-lobe'
 # Set necessary parameters
-title = r'Density Plot of The Side Lob'
-saveDirectory = "./Results/Step_04-Sidelob_Density.jpg"
+title = r'Density Plot of The Side Lobe'
+saveDirectory = "./Results/Step_04-Sidelobe_Density.jpg"
 style = 'jet'
 interpolation = 'gaussian'
 show = 0
 
 # Set up the axes size
-xAxis = array([i for i in xrange(len(sidelobWindow))])
-yAxis = array([i for i in xrange(len(sidelobWindow))])
+xAxis = array([i for i in xrange(len(sidelobeWindow))])
+yAxis = array([i for i in xrange(len(sidelobeWindow))])
 
 '''
-    The density plot of the side-lob
+    The density plot of the side-lobe
 '''
 
 # Plot the density map of the side-lob
-densityPlot(abs(sidelobWindow), xAxis, yAxis, title, style, 
+densityPlot(abs(sidelobeWindow), xAxis, yAxis, title, style, 
             interpolation, saveDirectory, show)
 
 '''
-    The power spectrum plot of the side-lob
+    The power spectrum plot of the side-lobe
 '''
 
 # Set up the axes size
-xAxis = array([i for i in xrange(len(sidelobWindow[pixelWindow]))])
+pixelWindow = abs(xShift - xdiff)
+xAxis = array([i for i in xrange(len(sidelobeWindow[pixelWindow]))])
 
 # Set necessary parameters
-title = r'The Power Spectrum of The Simulated Side Lob'
+title = r'The Power Spectrum of The Simulated Side Lobe'
 xtitle = r'X Distance (mm)'
 ytitle = r'Intensity'
-saveDirectory = "./Results/Step_05-Power_Spectrum_Side_Lob.jpg"
+saveDirectory = "./Results/Step_05-Power_Spectrum_Side_Lobe.jpg"
 show = 0
 gridlines = [None, None]
 
-# Plot the power spectrum of the side-lob
-xyPlot(xAxis, abs(sidelobWindow[pixelWindow]), title, xtitle, ytitle,
+# Plot the power spectrum of the side-lobe
+xyPlot(xAxis, abs(sidelobeWindow[pixelWindow]), title, xtitle, ytitle,
        saveDirectory, show, gridlines)
 
 
 ############ Padding empty spaces in Fourier space ###################
 'Pad the matrix with zeros in x and y directions'
-sidelobWindow = fixDim(sidelobWindow, xPixel)
+sidelobeWindow = fixDim(sidelobeWindow, xPixel)
 
 
 ############# Perform the inverse Fourier transform ##################
 'Perform the inverse Fourier transform'
-invtransI = invFFT(sidelobWindow, xPixel, xRealDis/xPixel)
+invtransI = invFFT(sidelobeWindow, xPixel, xRealDis/xPixel)
 
 'Plot the inverse FFT of the phase of the given interferogram'
 # Set necessary parameters
@@ -238,7 +258,7 @@ densityPlot(phaseProfile, xAxis, yAxis, title, style,
 
 ##################### Image Enhancement ##############################
 'Set the image folder'
-folder = "Case_01-Known_Phase\\Results\\"
+folder = "Case_02-Unknown_Phase\\Results\\"
 
 'Increase the brightness of images'
 enhancer(6, 1.3, folder)
@@ -248,8 +268,8 @@ enhancer(6, 1.3, folder)
 
 
 '''
-        The threshold value is the tolerant gradient level between 2 adjacent
-        data points. Try to vary it and observe the change.
+    The threshold value is the tolerant gradient level between 2 adjacent
+    data points. Try to vary it and observe the change.
 '''
 
 
@@ -257,7 +277,7 @@ enhancer(6, 1.3, folder)
 # Set the mode
 mode = 0
 # Set the threshold
-threshold = 0.3
+threshold = 4.0
 # Unwrap phase
 phaseUnwrap = unwrapPhaseProfile(phaseProfile, mode, threshold)
 
@@ -271,6 +291,12 @@ show = 0
 
 # Plot the density map of the phase
 densityPlot(phaseUnwrap, xAxis, yAxis, title, style,
+            interpolation, saveDirectory, show)
+
+'Compare the unwrapped phase to the original one'
+saveDirectory = "./Results/Step_09_Compare-Unwrapped_Phase_Interferogram.jpg"
+# Plot the density map of the phase
+densityPlot(realPhase, xAxis, yAxis, title, style,
             interpolation, saveDirectory, show)
 
 
