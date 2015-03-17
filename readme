@@ -1,8 +1,11 @@
 for lam:
 
-to update git repo after you change files:
-    cd to phase_extraction (topmost directory of project)
-    git add *
-    git commit -m "put commit message here"
-    git push origin master (if this gives you errors...uh, talk to me or email
-    me, unless you can figure it out)
+    make sure you have the most recent version of the project before you edit files
+    by running:
+        git pull origin master
+
+    to update git repo after you change files:
+        cd to phase_extraction (topmost directory of project)
+        git add *
+        git commit -m "put your commit message here"
+        git push origin master
