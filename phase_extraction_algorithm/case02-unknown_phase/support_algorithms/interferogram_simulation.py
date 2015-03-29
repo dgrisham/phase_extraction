@@ -115,10 +115,11 @@ def intensityProfile(xPixel, yPixel, xRealDis, yRealDis, constants):
         # Compute intensity and pass the result to the intensity matrix
         for i in xrange(yPixel):
                 for j in xrange(xPixel):
-                        I[i, j], realPhaseList[i, j] = intensity(xPixelL[j], yPixelL[i], 
-                                                                                                         constants[0], constants[1],
-                                                                                                         constants[2], constants[3],
-                                                                                                         constants[4], constants[5])
+                        I[i, j], realPhaseList[i, j] = \
+                                intensity(xPixelL[j], yPixelL[i],\
+                                constants[0], constants[1],\
+                                constants[2], constants[3],\
+                                constants[4], constants[5])
 
         # Return the intensity profile
         return I, xPixelL, yPixelL, realPhaseList

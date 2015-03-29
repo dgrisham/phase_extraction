@@ -23,6 +23,9 @@ import matplotlib.pyplot as plt
 'Import external Python modules'
 # Set the modules' directory
 sys.path.append(os.path.abspath(os.path.join(os.getcwd())) + "/support_algorithms")
+sys.path.append(os.path.abspath(os.path.join(os.getcwd())) + "/image_functions")
+# import image processing modules
+from image_functions import *
 # Import modules for simulating the interferogram
 from interferogram_simulation import convert, intensityProfile
 # Import modules for plotting
@@ -33,7 +36,8 @@ from fourier_transformation import FFT, fixDim, invFFT
 from phase_retrieval import phaseExtraction, unwrapPhaseProfile
 # Import modules for processing images
 from image_processing import enhancer, centroidSidelobe, sort
-
+# get path for images
+image_path = '../../images'
 
 '''
     This file executes algorithms from files in the "Support_Algorithms"
@@ -78,6 +82,20 @@ listConst = [a1, a2, w, w0, theta0, factors]
 'Set up the image grid'
 # Image size
 xPixel, yPixel = 1024, 1024
+
+
+''' look here, lam '''
+# here's where i put in some code.
+# first i load the image, then subtract
+# off the background. now i'm not sure what
+# exactly i want to do. i set the values of
+# xPixel and yPixel, that's about it. 
+img = import_image(image_path + '/image0.jpg')
+bg = import_image(image_path + '/background.jpg')
+img = subtract_background(img, bg)
+# at this point, 'img' is a 2-d numpy array.
+#show_image(img) # uncomment this line to see img
+(xPixel, yPixel) = img.shape
 xRealDis, yRealDis = 4.*w, 4.*w
 
 'Get the intensity profile'
